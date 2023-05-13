@@ -3,15 +3,33 @@ class Barrier extends Phaser.GameObjects.Container {
         super(scene);
         this.config = config;
 
-        this.barrier = scene.physics.add.sprite(0, 0, config.texture)
-            .setScale(config.scaleX, config.scaleY)
-            .setImmovable();
+        this.tile = 6 * 16;
+
+        // this.barrier = scene.physics.add.sprite(0, 0, config.texture)
+        //     .setScale(config.scaleX, config.scaleY)
+        //     .setImmovable();
         
         if (this.config.deadly == true) {
-            this.barrier.setTint(0xFF3000);
-        } else {
-            this.barrier.clearTint();
+            this.barrier = scene.add.sprite(0, 0, config.texture)
+                .setScale(config.scaleX, config.scaleY)
+                .setTint(0xFF3000)
+                .setOrigin(0, 0);
+        } else if (this.config.deadly == false) {
+            if (this.config.goal != true) {
+                this.barrier = scene.physics.add.sprite(0, 0, config.texture)
+                    .setScale(config.scaleX, config.scaleY)
+                    .setImmovable()
+                    .clearTint()
+                    .setOrigin(0, 0);
+            } else {
+                this.barrier = scene.physics.add.sprite(0, 0, config.texture)
+                    .setScale(config.scaleX, config.scaleY)
+                    .setTint(0x00FF66)
+                    .setOrigin(0, 0);
+            }
         }
+
+
         
         this.add(this.barrier);
     }
@@ -41,52 +59,69 @@ class baseScene extends Phaser.Scene {
     constructor() {
         super("baseScene");
     }
-}
-
-class scene1 extends baseScene {
-    constructor() {
-        super("scene1")
-    }
 
     preload() {
         this.load.path = "./assets/";
         this.load.image("char", "tileLight.png");
     }
 
+    // gotoScene(key) {
+    //     this.cameras.main.fade(this.transitionDuration, 0, 0, 0);
+    //     this.time.delayedCall(this.transitionDuration, () => {
+    //         this.scene.start(key, { inventory: this.inventory });
+    //     });
+    // }
+
+    // checkDeadly(player, tile) {
+    //     console.log(tile.config.deadly);
+    //     if (tile.config.deadly == true) {
+    //         player.setGravity(0, 0).setVelocity(0).setTint(0xFF3000);
+    //         this.tweens.add({
+    //             targets: player,
+    //             y: `-=${2 * this.s}`,
+    //             alpha: { from: 1, to: 0 },
+    //             duration: 500,
+    //             onComplete: () => player.destroy(),
+    //             // onComplete: () => this.gotoScene("scene1")
+    //         })
+    //     }
+    // }
+    
     create() {
-        let barrier1 = new Barrier(this,{texture: "char", scaleX: 15, scaleY: 1, deadly: false});  
 
-        this.barrier2 = this.add.existing(barrier1)
-            .setPosition(this.cameras.main.centerX, 800)
-        
-        
+        this.leftPress = false
+        this.left = this.add.sprite(600, 100, "char")
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.left.setTint(0xFF0000);
+                this.leftPress = true
+            })
+            .on('pointerup', () => {
+                this.left.clearTint()
+                this.leftPress = false
+            })
 
+        this.rightPress = false
+        this.right = this.add.sprite(800, 100, "char")
+            .setInteractive()
+            .on('pointerdown', () => {
+                this.right.setTint(0xFF0000);
+                this.rightPress = true
+            })
+            .on('pointerup', () => {
+                this.right.clearTint()
+                this.rightPress = false
+            })
 
-        // this.barrier = this.physics.add.sprite(0, 0, "char")
-        //     .setScale(15, 1)
-        //     .setPosition(this.cameras.main.centerX, 800)
-        //     .setImmovable();
-            
-        this.player1 = this.physics.add.sprite(0, 0, "char")
-            .setOrigin(0.5, 0.5)
-            .setPosition(this.cameras.main.centerX, 500)
-            .setGravityY(500)
-            .setCollideWorldBounds(true);
-
-        this.physics.add.collider(this.player1, this.barrier2.barrier);
-
-        this.isJumping = false;
-        
     }
 
     update() {
-        
         this.player1.setVelocityX(0);
         let d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
         let a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
         let space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
 
-        if (d.isDown) {
+        if (d.isDown || this.rightPress == true) {
             console.log("updating");
             this.player1.setVelocityX(600);
             // debugger;
@@ -96,7 +131,7 @@ class scene1 extends baseScene {
             this.player1.setVelocityX(-600);
         }
 
-        if (space.isDown) {
+        if (space.isDown || this.leftPress == true) {
             if (this.isJumping !== true && this.player1.body.velocity.y == 0) {
                 this.player1.setVelocityY(-500);
                 this.isJumping = true;
@@ -106,12 +141,97 @@ class scene1 extends baseScene {
             this.isJumping = false
         }
 
-        // if (this.player1.body.velocity.y != 0) {
-        //     console.log(this.player1.body.velocity.y);
-        //     this.jumped = true
-        // }
+        if (this.checkBounds(this.player1, this.goal.barrier)) {
+            console.log("win!");
+            this.player1.setGravity(0).setVelocity(0);
+            this.gotoScene("scene2")
+        }
+    }
+
+    checkBounds(target, bounds) {
+        if (this.physics.overlap(target, bounds)) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+
+    gotoScene(key) {
+        this.cameras.main.fade(1000, 0, 0, 0);
+        this.time.delayedCall(1000, () => {
+            this.scene.start(key);
+        });
+    }
+
+    
+}
+
+class scene1 extends baseScene {
+    constructor() {
+        super("scene1")
+    }
+
+    create() {
+
+        this.barrierGroup = this.add.group();
+
+        this.barrier2 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: 1, deadly: false}))
+            .setPosition(0, 800);
+
+        this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 2, scaleY: 1, deadly: true}))
+            .setPosition(800, 800);
+
+        this.barrier4 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 2, scaleY: 1, deadly: false}))
+            .setPosition(900, 600);
+
+        this.barrier5 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 3, deadly: true}))
+            .setPosition(600, 200);
+        
+        this.barrier6 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 6, scaleY: 1, deadly: false}))
+            .setPosition(0, 450);
+
+        this.barrier7 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 4, scaleY: 1, deadly: false}))
+            .setPosition(800, 300);
+
+        this.goal = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 4, deadly: false, goal: true}))
+            .setPosition(1200, 0);
 
 
+        this.barrierGroup
+            .add(this.barrier2.barrier)
+            .add(this.barrier3.barrier)
+            .add(this.barrier4.barrier)
+            .add(this.barrier5.barrier)
+            .add(this.barrier6.barrier)
+            .add(this.barrier7.barrier)
+
+    
+
+        // this.barrier = this.physics.add.sprite(0, 0, "char")
+        //     .setScale(15, 1)
+        //     .setPosition(this.cameras.main.centerX, 800)
+        //     .setImmovable();
+            
+        this.player1 = this.physics.add.sprite(0, 0, "char")
+            .setOrigin(0.5, 0.5)
+            .setPosition(200, 600)
+            .setGravityY(500)
+            // .setCollideWorldBounds(true)
+
+        this.colliding = this.physics.add.collider(this.player1, this.barrierGroup);
+
+        this.isJumping = false;
+        
+
+        // console.log(this.barrier2.deadly);
+    }
+
+    
+}
+
+class scene2 extends baseScene {
+    constructor() {
+        super("scene2");
     }
 }
 
