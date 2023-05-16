@@ -10,8 +10,9 @@ class Barrier extends Phaser.GameObjects.Container {
         //     .setImmovable();
         
         if (this.config.deadly == true) {
-            this.barrier = scene.add.sprite(0, 0, config.texture)
+            this.barrier = scene.physics.add.sprite(0, 0, config.texture)
                 .setScale(config.scaleX, config.scaleY)
+                .setImmovable()
                 .setTint(0xFF3000)
                 .setOrigin(0, 0);
         } else if (this.config.deadly == false) {
@@ -29,7 +30,14 @@ class Barrier extends Phaser.GameObjects.Container {
             }
         }
 
-
+        if (config.switch == true) {
+            this.barrier
+                .setTint(0x0000FF) 
+                .setInteractive()
+                .on("pointerdown", () => {
+                    console.log("hello");
+                })          
+        }
         
         this.add(this.barrier);
     }
@@ -146,6 +154,15 @@ class baseScene extends Phaser.Scene {
             this.player1.setGravity(0).setVelocity(0);
             this.gotoScene("scene2")
         }
+        
+        if (this.checkBounds(this.player1, this.switch.barrier)) {
+            this.switch.barrier
+                .setInteractive()
+                .on("pointerdown", () => {
+                    console.log("wazzap");
+                    this.obstacle.destroy();
+                })
+        }
     }
 
     checkBounds(target, bounds) {
@@ -184,7 +201,7 @@ class scene1 extends baseScene {
         this.barrier4 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 2, scaleY: 1, deadly: false}))
             .setPosition(900, 600);
 
-        this.barrier5 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 3, deadly: true}))
+        this.obstacle = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 3, deadly: true}))
             .setPosition(600, 200);
         
         this.barrier6 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 6, scaleY: 1, deadly: false}))
@@ -196,12 +213,15 @@ class scene1 extends baseScene {
         this.goal = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 4, deadly: false, goal: true}))
             .setPosition(1200, 0);
 
+        this.switch = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, switch: true}))
+            .setPosition(950, 500);
+
 
         this.barrierGroup
             .add(this.barrier2.barrier)
             .add(this.barrier3.barrier)
             .add(this.barrier4.barrier)
-            .add(this.barrier5.barrier)
+            .add(this.obstacle.barrier)
             .add(this.barrier6.barrier)
             .add(this.barrier7.barrier)
 
@@ -224,9 +244,9 @@ class scene1 extends baseScene {
         
 
         // console.log(this.barrier2.deadly);
-    }
 
-    
+        console.log(this.switch.barrier);
+    }
 }
 
 class scene2 extends baseScene {
