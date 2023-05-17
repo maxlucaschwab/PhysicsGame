@@ -311,6 +311,50 @@ class scene2 extends baseScene {
     constructor() {
         super("scene2");
     }
+
+    create() {
+        this.barrierGroup = this.add.group();
+
+        this.barrier2 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: 1, deadly: false}))
+            .setPosition(-600, 800);
+        
+        this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: 1, deadly: false}))
+            .setPosition(1100, 800);
+
+        this.barrier4 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: .5, deadly: false}))
+            .setPosition(1100, 200);
+
+        this.barrier5 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: .5, deadly: false}))
+            .setPosition(-600, 200);
+
+        this.obstacle = this.add.existing(new Barrier(this,{texture: "char", scaleX: .5, scaleY: 3, deadly: true}))
+            .setPosition(150, -50);
+
+        this.goal = this.add.existing(new Barrier(this,{texture: "char", scaleX: 1, scaleY: 2, deadly: false, goal: true}))
+            .setPosition(-50, 0);
+
+        this.switch = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, switch: true}))
+            .setPosition(1150, 75);
+
+        this.item = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, superJump: true}))
+            .setPosition(1150, 700);
+
+        this.barrierGroup
+            .add(this.barrier2.barrier)
+            .add(this.barrier3.barrier)
+            .add(this.barrier4.barrier)
+            .add(this.barrier5.barrier)
+            .add(this.obstacle.barrier)
+
+        this.player1 = this.physics.add.sprite(0, 0, "char")
+            .setOrigin(0.5, 0.5)
+            .setPosition(150, 600)
+            .setGravityY(625)
+
+        this.colliding = this.physics.add.collider(this.player1, this.barrierGroup);
+
+    }
+   
 }
 
 let config = {
@@ -318,7 +362,7 @@ let config = {
     width: 1350,
     height: 825,
     backgroundColor: 0x0FFFFF,
-    scene: [scene1, scene2],
+    scene: [scene2],
     physics: {
         default: 'arcade',
         arcade: {
