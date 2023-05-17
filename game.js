@@ -38,6 +38,11 @@ class Barrier extends Phaser.GameObjects.Container {
                     console.log("hello");
                 })          
         }
+
+        if (config.superJump == true) {
+            this.barrier
+                .setTint(0xFFBF00)
+        }
         
         this.add(this.barrier);
     }
@@ -64,8 +69,8 @@ class Barrier extends Phaser.GameObjects.Container {
 
 
 class baseScene extends Phaser.Scene {
-    constructor() {
-        super("baseScene");
+    constructor(key) {
+        super(key)
     }
 
     preload() {
@@ -127,7 +132,32 @@ class baseScene extends Phaser.Scene {
         this.player1.setVelocityX(0);
         let d = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D)
         let a = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A)
+        let w = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W)
         let space = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        let one = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ONE)
+        let two = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.TWO)
+        let three = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.THREE)
+        let four = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FOUR)
+        let five = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.FIVE)
+        let six = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SIX)
+
+        // let sceneArr = []
+        // let keyString = String(getKey());
+        // sceneArr = keyString.split();
+        // console.log(config.key);
+        if (one.isDown) {
+            this.gotoScene("scene1")
+        } else if (two.isDown) {
+            this.gotoScene("scene2")
+        } else if (three.isDown) {
+            this.gotoScene("scene3")
+        } else if (four.isDown) {
+            this.gotoScene("scene4")
+        } else if (five.isDown) {
+            this.gotoScene("scene5")
+        } else if (six.isDown) {
+            this.gotoScene("scene6")
+        }
 
         if (d.isDown || this.rightPress == true) {
             console.log("updating");
@@ -149,20 +179,46 @@ class baseScene extends Phaser.Scene {
             this.isJumping = false
         }
 
+        let itemCheck = this.checkBounds(this.player1, this.item.barrier)
+
+        if (itemCheck) {
+            this.superJumpItem = true
+            this.player1.setTint(0xA020F0)
+            this.item.destroy()
+        }
+
+        if (this.player1.body.velocity.y != 0 && w.isDown && this.superJumpItem == true) {
+            if (this.superJump !== true && this.isJumping == true) {
+                this.player1.setVelocity(this.player1.body.velocity.x * 2.5, this.player1.body.velocity.y * 2.5);
+                this.superJump = true;
+                console.log("jump");
+            }
+        } else {
+            if (this.player1.body.velocity.y == 0) {
+                this.superJump = false;
+            }
+        }
+
+        // console.log(this.player1.body.velocity.x);
+
+
         if (this.checkBounds(this.player1, this.goal.barrier)) {
             console.log("win!");
             this.player1.setGravity(0).setVelocity(0);
             this.gotoScene("scene2")
         }
+
         
-        if (this.checkBounds(this.player1, this.switch.barrier)) {
+        let switchCheck = this.checkBounds(this.player1, this.switch.barrier)
+
+        if (switchCheck) {
             this.switch.barrier
                 .setInteractive()
                 .on("pointerdown", () => {
                     console.log("wazzap");
                     this.obstacle.destroy();
                 })
-        }
+        } 
     }
 
     checkBounds(target, bounds) {
@@ -185,18 +241,17 @@ class baseScene extends Phaser.Scene {
 
 class scene1 extends baseScene {
     constructor() {
-        super("scene1")
+        super('scene1')
     }
 
     create() {
+
+        console.log(this.scene)
 
         this.barrierGroup = this.add.group();
 
         this.barrier2 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: 1, deadly: false}))
             .setPosition(0, 800);
-
-        this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 2, scaleY: 1, deadly: true}))
-            .setPosition(800, 800);
 
         this.barrier4 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 2, scaleY: 1, deadly: false}))
             .setPosition(900, 600);
@@ -216,10 +271,13 @@ class scene1 extends baseScene {
         this.switch = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, switch: true}))
             .setPosition(950, 500);
 
+        this.item = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, superJump: true}))
+            .setPosition(950, 1000);
+
+
 
         this.barrierGroup
             .add(this.barrier2.barrier)
-            .add(this.barrier3.barrier)
             .add(this.barrier4.barrier)
             .add(this.obstacle.barrier)
             .add(this.barrier6.barrier)
@@ -260,7 +318,7 @@ let config = {
     width: 1350,
     height: 825,
     backgroundColor: 0x0FFFFF,
-    scene: [scene1],
+    scene: [scene1, scene2],
     physics: {
         default: 'arcade',
         arcade: {
