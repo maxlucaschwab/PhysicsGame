@@ -212,12 +212,62 @@ class baseScene extends Phaser.Scene {
     
 }
 
+class scene1 extends baseScene {
+    constructor() {
+        super('scene1')
+    }
+
+    onEnter() {
+
+        this.convo = this.add.text(
+            0,
+            0,
+            "Welcome to my physics game! Press 'A' and 'D' to move and 'SPACEBAR' to jump! Alternatively, you can use the green buttons at the top of the screen. To proceed, head to the green portal.",
+            {
+                font: "30px bold",
+                color: "#00000",
+                wordWrap: { width: 1000, useAdvancedWrap: true }
+            }
+        )
+        
+        this.convo.setOrigin(0.5, 0.5).setPosition(this.cameras.main.centerX, this.cameras.main.centerY)
+
+        this.barrierGroup = this.add.group();
+            
+        this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 15, scaleY: 1, deadly: false}))
+            .setPosition(0, 800);
+
+        this.obstacle = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: true}))
+            .setPosition(-600, -200);
+        
+        this.goal = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 4, deadly: false, goal: true}))
+            .setPosition(1300, 500);
+
+        this.switch = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, switch: true}))
+            .setPosition(-950, -500);
+
+        this.item = this.add.existing(new Barrier(this,{texture: "char", scaleX: 0.5, scaleY: 0.5, deadly: false, superJump: true}))
+            .setPosition(-950, -1000);
+
+        this.barrierGroup
+            .add(this.barrier3.barrier)
+
+        this.player1 = this.physics.add.sprite(0, 0, "char")
+            .setOrigin(0.5, 0.5)
+            .setPosition(200, 700)
+            .setGravityY(500)
+
+        this.colliding = this.physics.add.collider(this.player1, this.barrierGroup);
+    }
+}
+
 class scene2 extends baseScene {
     constructor() {
         super('scene2')
     }
 
     onEnter() {
+        
         this.barrierGroup = this.add.group();
 
         this.barrier2 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 8, scaleY: 1, deadly: false}))
@@ -261,6 +311,20 @@ class scene3 extends baseScene {
     }
 
     onEnter() {
+
+        this.convo = this.add.text(
+            0,
+            0,
+            'Good job! You jumped! Now its gonna get a bit harder… Click the switch in the next level to remove the obstacle.',
+            {
+                font: "30px bold",
+                color: "#00000",
+                wordWrap: { width: 1000, useAdvancedWrap: true }
+            }
+        )
+
+        this.convo.setOrigin(0.5, 0.5).setPosition(this.cameras.main.centerX, this.cameras.main.centerY)
+
         this.barrierGroup = this.add.group();
             
         this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 15, scaleY: 1, deadly: false}))
@@ -287,6 +351,7 @@ class scene3 extends baseScene {
             .setGravityY(500)
 
         this.colliding = this.physics.add.collider(this.player1, this.barrierGroup);
+
     }
 }
 
@@ -349,6 +414,20 @@ class scene5 extends baseScene {
     }
 
     onEnter() {
+
+        this.convo = this.add.text(
+            0,
+            0,
+            "Wow you did it! That was a little more challenging, huh? Now its time to get serious. Grab the orange item in the next scene and you can super jump (press 'W' while jumping)! Pretty cool, innit? Be careful, though, you go the furthest when your velocitys the highest.",
+            {
+                font: "30px bold",
+                color: "#00000",
+                wordWrap: { width: 1000, useAdvancedWrap: true }
+            }
+        )
+
+        this.convo.setOrigin(0.5, 0.5).setPosition(this.cameras.main.centerX, this.cameras.main.centerY)
+
         this.barrierGroup = this.add.group();
             
         this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 15, scaleY: 1, deadly: false}))
@@ -436,6 +515,20 @@ class scene7 extends baseScene {
     }
 
     onEnter() {
+
+        this.convo = this.add.text(
+            0,
+            0,
+            "You beat my game!! Congrats!! If you want to play the levels again, press '1' and '2' on your keyboard or refresh the page to cycle through the levels",
+            {
+                font: "30px bold",
+                color: "#00000",
+                wordWrap: { width: 1000, useAdvancedWrap: true }
+            }
+        )
+
+        this.convo.setOrigin(0.5, 0.5).setPosition(this.cameras.main.centerX, this.cameras.main.centerY)
+
         this.barrierGroup = this.add.group();
             
         this.barrier3 = this.add.existing(new Barrier(this,{texture: "char", scaleX: 15, scaleY: 1, deadly: false}))
@@ -470,7 +563,7 @@ let config = {
     width: 1350,
     height: 825,
     backgroundColor: 0x0FFFFF,
-    scene: [scene3, scene4, scene5, scene6, scene7],
+    scene: [scene1, scene2, scene3, scene4, scene5, scene6, scene7],
     physics: {
         default: 'arcade',
         arcade: {
